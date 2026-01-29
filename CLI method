@@ -2,102 +2,104 @@
 
 This guide walks through creating VPC infrastructure using AWS CloudShell and the AWS CLI.
 
-## Prerequisites
+Prerequisites
 
 - AWS account with IAM admin user
 - Access to AWS CloudShell (available in AWS Console)
 
-## Step 1: Open CloudShell
+Step 1: Open CloudShell
 
 1. Log into AWS Console with your IAM admin user
 2. Click the CloudShell icon at the top navigation bar
 3. Wait for CloudShell environment to initialize (first-time users may wait 1-2 minutes)
 
-## Step 2: Create the VPC
+Step 2: Create the VPC
 
 ```bash
 aws ec2 create-vpc --cidr-block 10.0.0.0/16 --query Vpc.VpcId --output text
 ```
 
-**Output:** `vpc-0573c266b2cd5f340`
+Expected Output: vpc-0573c266b2cd5f340
 
-### Command Breakdown:
-- `aws ec2` - Uses EC2 service (VPCs originally designed for EC2)
-- `create-vpc` - Action to create new VPC
-- `--cidr-block 10.0.0.0/16` - IP address range (65,536 addresses)
-- `--query Vpc.VpcId` - Filter output to show only VPC ID
-- `--output text` - Format as plain text (not JSON)
+Command Breakdown:
+- aws ec2 uses EC2 service (VPCs originally designed for EC2)
+- create-vpc is the action to create new VPC
+- --cidr-block 10.0.0.0/16 sets IP address range (65,536 addresses)
+- --query Vpc.VpcId filters output to show only VPC ID
+- --output text formats as plain text (not JSON)
 
-## Step 3: Tag the VPC (Optional but Recommended)
+Step 3: Tag the VPC (Optional but Recommended)
 
 ```bash
 aws ec2 create-tags --resources=vpc-0573c266b2cd5f340 --tags Key=Name,Value="NextWork VPC 2"
 ```
 
-**Note:** Replace `vpc-0573c266b2cd5f340` with your actual VPC ID from Step 2.
+Note: Replace vpc-0573c266b2cd5f340 with your actual VPC ID from Step 2.
 
-### Common Error:
+Common Error:
+
+Wrong - Missing equals sign:
 ```bash
-# ❌ WRONG - Missing equals sign
 aws ec2 create-tags --resources-0573c266b2cd5f340 --tags Key=Name,Value="NextWork VPC 2"
+```
 
-# ✅ CORRECT
+Correct:
+```bash
 aws ec2 create-tags --resources=vpc-0573c266b2cd5f340 --tags Key=Name,Value="NextWork VPC 2"
 ```
 
-## Step 4: Create the Subnet
+Step 4: Create the Subnet
 
 ```bash
 aws ec2 create-subnet --vpc-id vpc-0573c266b2cd5f340 --cidr-block 10.0.0.0/24
 ```
 
-**Output:** Returns JSON with subnet details including:
-- `SubnetId`: subnet-0f1a72c3ff1059544
-- `AvailabilityZone`: us-east-1b
-- `CidrBlock`: 10.0.0.0/24
-- `VpcId`: vpc-0573c266b2cd5f340
+Expected Output: Returns JSON with subnet details including SubnetId (subnet-0f1a72c3ff1059544), AvailabilityZone (us-east-1b), CidrBlock (10.0.0.0/24), and VpcId (vpc-0573c266b2cd5f340)
 
-### Common Error:
+Common Error:
+
+Wrong - Missing CIDR block:
 ```bash
-# ❌ WRONG - Missing CIDR block
 aws ec2 create-subnet --vpc-id vpc-0573c266b2cd5f340 --cidr-block ADD-CIDR-BLOCK-HERE
+```
 
-# Error: InvalidParameterValue - Value (ADD-CIDR-BLOCK-HERE) for parameter cidrBlock is invalid. This is not a valid CIDR block.
+Error message: InvalidParameterValue - Value (ADD-CIDR-BLOCK-HERE) for parameter cidrBlock is invalid. This is not a valid CIDR block.
 
-# ✅ CORRECT
+Correct:
+```bash
 aws ec2 create-subnet --vpc-id vpc-0573c266b2cd5f340 --cidr-block 10.0.0.0/24
 ```
 
-**Important:** The `--cidr-block` parameter is **required**, not optional. AWS needs to know what IP range to assign to the subnet.
+Important: The --cidr-block parameter is required, not optional. AWS needs to know what IP range to assign to the subnet.
 
-## Step 5: Create Internet Gateway
+Step 5: Create Internet Gateway
 
 ```bash
 aws ec2 create-internet-gateway --query InternetGateway.InternetGatewayId --output text
 ```
 
-**Output:** `igw-0d3795341e94a0444`
+Expected Output: igw-0d3795341e94a0444
 
-## Step 6: Attach Internet Gateway to VPC
+Step 6: Attach Internet Gateway to VPC
 
 ```bash
 aws ec2 attach-internet-gateway --vpc-id vpc-0573c266b2cd5f340 --internet-gateway-id igw-0d3795341e94a0444
 ```
 
-**Note:** Replace IDs with your actual VPC ID and IGW ID from previous steps.
+Note: Replace IDs with your actual VPC ID and IGW ID from previous steps.
 
-**Output:** No output means success! The gateway is now attached.
+Expected Output: No output means success. The gateway is now attached.
 
-## Verification
+Verification
 
-### Verify in Console:
+Verify in Console:
 
 1. Navigate to VPC Console
-2. Select "Your VPCs" - confirm your VPC exists with correct CIDR
-3. Select "Subnets" - confirm subnet with 10.0.0.0/24 range
-4. Select "Internet Gateways" - confirm gateway shows "Attached" status
+2. Select Your VPCs - confirm your VPC exists with correct CIDR
+3. Select Subnets - confirm subnet with 10.0.0.0/24 range
+4. Select Internet Gateways - confirm gateway shows "Attached" status
 
-### Verify via CLI:
+Verify via CLI:
 
 ```bash
 # List your VPCs
@@ -110,7 +112,7 @@ aws ec2 describe-subnets --filters "Name=vpc-id,Values=vpc-0573c266b2cd5f340"
 aws ec2 describe-internet-gateways --internet-gateway-ids igw-0d3795341e94a0444
 ```
 
-## Cleanup Commands
+Cleanup Commands
 
 When done with the infrastructure, delete in this order:
 
@@ -128,27 +130,84 @@ aws ec2 delete-subnet --subnet-id subnet-0f1a72c3ff1059544
 aws ec2 delete-vpc --vpc-id vpc-0573c266b2cd5f340
 ```
 
-## Complete Script
+Complete Script
 
-See [complete-setup.sh](../scripts/complete-setup.sh) for a ready-to-run script with all commands.
+Here's all commands together using variables:
 
-## Tips
+```bash
+# 1. Create VPC
+VPC_ID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --query Vpc.VpcId --output text)
+echo "VPC ID: $VPC_ID"
 
-1. **Save IDs immediately** - Copy VPC ID, Subnet ID, and IGW ID into a text file as you create them
-2. **Use --query for cleaner output** - Filters make it easier to grab IDs without parsing JSON
-3. **Tag resources early** - Easier to identify resources in Console
-4. **Check AWS region** - Ensure CloudShell is in correct region (check top-right of Console)
+# 2. Tag VPC
+aws ec2 create-tags --resources=$VPC_ID --tags Key=Name,Value="NextWork VPC"
 
-## Advantages of CLI Method
+# 3. Create Subnet
+SUBNET_ID=$(aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.0.0/24 --query Subnet.SubnetId --output text)
+echo "Subnet ID: $SUBNET_ID"
 
-- **Speed:** Create resources in seconds vs clicking through multiple pages
-- **Repeatability:** Copy/paste commands to recreate infrastructure
-- **Automation:** Can integrate into scripts for DevOps pipelines
-- **Version Control:** Store commands in Git for infrastructure-as-code
+# 4. Tag Subnet
+aws ec2 create-tags --resources=$SUBNET_ID --tags Key=Name,Value="Public 1"
 
-## When to Use Console Instead
+# 5. Enable auto-assign public IP
+aws ec2 modify-subnet-attribute --subnet-id $SUBNET_ID --map-public-ip-on-launch
+
+# 6. Create Internet Gateway
+IGW_ID=$(aws ec2 create-internet-gateway --query InternetGateway.InternetGatewayId --output text)
+echo "IGW ID: $IGW_ID"
+
+# 7. Tag Internet Gateway
+aws ec2 create-tags --resources=$IGW_ID --tags Key=Name,Value="NextWork IG"
+
+# 8. Attach Internet Gateway
+aws ec2 attach-internet-gateway --vpc-id $VPC_ID --internet-gateway-id $IGW_ID
+
+echo "Setup complete!"
+echo "VPC: $VPC_ID"
+echo "Subnet: $SUBNET_ID"
+echo "IGW: $IGW_ID"
+```
+
+Tips
+
+1. Save IDs immediately - Copy VPC ID, Subnet ID, and IGW ID into a text file as you create them
+2. Use --query for cleaner output - Filters make it easier to grab IDs without parsing JSON
+3. Tag resources early - Easier to identify resources in Console
+4. Check AWS region - Ensure CloudShell is in correct region (check top-right of Console)
+
+Advantages of CLI Method
+
+- Speed: Create resources in seconds vs clicking through multiple pages
+- Repeatability: Copy/paste commands to recreate infrastructure
+- Automation: Can integrate into scripts for DevOps pipelines
+- Version Control: Store commands in Git for infrastructure-as-code
+
+When to Use Console Instead
 
 - Learning AWS for the first time (better visualization)
 - Complex configurations requiring visual confirmation
 - Troubleshooting issues (easier to see resource relationships)
 - One-off setups where speed isn't critical
+
+Common Command Options Explained
+
+--query
+Filters JSON output to show only specific fields. For example, --query Vpc.VpcId gets VPC ID from output.
+
+--output
+Controls output format. Options are text (plain text, easy to save in variables), json (default, most detailed), or table (ASCII table, human-readable).
+
+--filters
+Searches resources by specific criteria. For example, --filters "Name=vpc-id,Values=vpc-123" finds by VPC ID.
+
+Region-Specific Commands
+
+If you need to work in a specific region, add --region flag to any command or set default region:
+
+```bash
+# Add --region flag
+aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region us-west-2
+
+# Or set default region
+aws configure set region us-east-1
+```
