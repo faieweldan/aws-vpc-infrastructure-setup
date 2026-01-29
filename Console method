@@ -2,187 +2,172 @@
 
 This guide walks through creating VPC infrastructure using the AWS web console interface.
 
-## Prerequisites
+Prerequisites
 
 - AWS account
 - IAM admin user (not root user)
 - Logged into AWS Console
 
-## Step 1: Navigate to VPC Service
+Step 1: Navigate to VPC Service
 
 1. In AWS Console search bar, type "VPC"
-2. Select **VPC** from the dropdown menu
+2. Select VPC from the dropdown menu
 3. Ensure you're in the correct region (top-right corner) - use region closest to you
 
-### About the Default VPC
+About the Default VPC
 
 You'll notice a VPC already exists in your account. AWS automatically creates a default VPC when you create your account, which is why you can launch EC2 instances immediately without setting up networking first.
 
-## Step 2: Create VPC
+Step 2: Create VPC
 
-1. In left navigation pane, click **Your VPCs**
-2. Click **Create VPC** button
+1. In left navigation pane, click Your VPCs
+2. Click Create VPC button
 3. Configure VPC settings:
-   - **Resources to create:** Select "VPC only"
-   - **Name tag:** `NextWork VPC`
-   - **IPv4 CIDR block:** Select "IPv4 CIDR manual input"
-   - **IPv4 CIDR:** `10.0.0.0/16`
-   - **IPv6 CIDR block:** "No IPv6 CIDR block"
-   - **Tenancy:** Default
+   - Resources to create: Select "VPC only"
+   - Name tag: NextWork VPC
+   - IPv4 CIDR block: Select "IPv4 CIDR manual input"
+   - IPv4 CIDR: 10.0.0.0/16
+   - IPv6 CIDR block: "No IPv6 CIDR block"
+   - Tenancy: Default
+4. Click Create VPC
 
-4. Click **Create VPC**
+Understanding CIDR Blocks
 
-### Understanding CIDR Blocks
+10.0.0.0/16 means the first 16 bits (10.0) are fixed and the last 16 bits can vary. This gives you 65,536 total IP addresses, ranging from 10.0.0.0 to 10.0.255.255.
 
-- **10.0.0.0/16** means:
-  - First 16 bits (10.0) are fixed
-  - Last 16 bits can vary
-  - Total addresses: 2^16 = 65,536 IP addresses
-  - Range: 10.0.0.0 to 10.0.255.255
+Smaller number after the slash means bigger address range. For example, /8 gives you 16 million addresses while /24 gives you only 256 addresses.
 
-- **Smaller number = bigger range**
-  - /8 = 16,777,216 addresses (huge)
-  - /16 = 65,536 addresses (what we used)
-  - /24 = 256 addresses (typical subnet size)
+Step 3: Create Subnet
 
-## Step 3: Create Subnet
-
-1. In left navigation pane, click **Subnets**
-2. Click **Create subnet**
+1. In left navigation pane, click Subnets
+2. Click Create subnet
 3. Configure subnet settings:
-   - **VPC ID:** Select `NextWork VPC`
-   - **Subnet name:** `Public 1`
-   - **Availability Zone:** Select first AZ in list (e.g., us-east-1a)
-   - **IPv4 subnet CIDR block:** `10.0.0.0/24`
+   - VPC ID: Select NextWork VPC
+   - Subnet name: Public 1
+   - Availability Zone: Select first AZ in list (e.g., us-east-1a)
+   - IPv4 subnet CIDR block: 10.0.0.0/24
+4. Click Create subnet
 
-4. Click **Create subnet**
+Why This Isn't Public Yet
 
-### Why This Isn't Public Yet
+Even though we named it "Public 1", this subnet has no internet access yet. It becomes truly public only after we attach an internet gateway and update route tables. We'll do the gateway part in this project.
 
-Even though we named it "Public 1", this subnet has NO internet access yet. It becomes truly public only after we attach an internet gateway and update route tables (we'll do the gateway part in this project).
-
-## Step 4: Enable Auto-Assign Public IPv4
+Step 4: Enable Auto-Assign Public IPv4
 
 This setting automatically gives EC2 instances a public IP when launched in this subnet.
 
-1. Select the checkbox next to **Public 1** subnet
-2. Click **Actions** → **Edit subnet settings**
-3. Check the box: **Enable auto-assign public IPv4 address**
-4. Click **Save**
+1. Select the checkbox next to Public 1 subnet
+2. Click Actions and then Edit subnet settings
+3. Check the box: Enable auto-assign public IPv4 address
+4. Click Save
 
-### Why This Matters
+Why This Matters
 
-- **Private IP** (automatic): For communication within VPC
-- **Public IP** (needs to be enabled): For communication with internet
+Private IP is automatic and used for communication within VPC. Public IP needs to be enabled and is used for communication with internet. Without auto-assign enabled, you'd need to manually allocate public IPs to each instance.
 
-Without auto-assign enabled, you'd need to manually allocate public IPs to each instance - tedious!
+Step 5: Create Internet Gateway
 
-## Step 5: Create Internet Gateway
-
-1. In left navigation pane, click **Internet Gateways**
-2. Click **Create internet gateway**
+1. In left navigation pane, click Internet Gateways
+2. Click Create internet gateway
 3. Configure:
-   - **Name tag:** `NextWork IG`
-4. Click **Create internet gateway**
+   - Name tag: NextWork IG
+4. Click Create internet gateway
 
-### About Internet Gateways
+About Internet Gateways
 
-An internet gateway is like a bridge connecting your private VPC to the public internet. Without it, resources in your VPC are completely isolated - they can talk to each other but not to the outside world.
+An internet gateway is like a bridge connecting your private VPC to the public internet. Without it, resources in your VPC are completely isolated. They can talk to each other but not to the outside world.
 
-## Step 6: Attach Internet Gateway to VPC
+Step 6: Attach Internet Gateway to VPC
 
 After creating the gateway, it's in a "detached" state and not doing anything yet.
 
-1. With your new gateway still selected, click **Actions** → **Attach to VPC**
-2. Select **NextWork VPC**
-3. Click **Attach internet gateway**
+1. With your new gateway still selected, click Actions and then Attach to VPC
+2. Select NextWork VPC
+3. Click Attach internet gateway
 
 You should see a green success banner confirming attachment.
 
-## Step 7: Verify Your Setup
+Verify Attachment
 
-### Check VPC:
-1. Navigate to **Your VPCs**
-2. Find `NextWork VPC`
-3. Verify CIDR is `10.0.0.0/16`
+1. Go to Internet Gateways in left nav
+2. Find your NextWork IG
+3. Check the State column - should say "Attached"
+4. Check the VPC ID column - should show your VPC ID
 
-### Check Subnet:
-1. Navigate to **Subnets**
-2. Find `Public 1`
-3. Verify:
-   - VPC ID matches NextWork VPC
-   - CIDR is `10.0.0.0/24`
-   - Auto-assign public IPv4 is "Yes"
+Step 7: Verify Your Setup
 
-### Check Internet Gateway:
-1. Navigate to **Internet Gateways**
-2. Find `NextWork IG`
+Check VPC:
+1. Navigate to Your VPCs
+2. Find NextWork VPC
+3. Verify CIDR is 10.0.0.0/16
+
+Check Subnet:
+1. Navigate to Subnets
+2. Find Public 1
+3. Verify VPC ID matches NextWork VPC
+4. Verify CIDR is 10.0.0.0/24
+5. Verify Auto-assign public IPv4 is "Yes"
+
+Check Internet Gateway:
+1. Navigate to Internet Gateways
+2. Find NextWork IG
 3. Verify State is "Attached"
 
-## Architecture Diagram
+Architecture Overview
 
-```
+Your setup now looks like this:
+
 Internet
     |
-    ↓
-[Internet Gateway: NextWork IG]
+Internet Gateway: NextWork IG
     |
-    ↓
-[VPC: NextWork VPC - 10.0.0.0/16]
+VPC: NextWork VPC - 10.0.0.0/16
     |
-    ↓
-[Subnet: Public 1 - 10.0.0.0/24]
-(in us-east-1b)
-```
+Subnet: Public 1 - 10.0.0.0/24 (in us-east-1b)
 
-## What's Missing for Full Internet Access?
+What's Missing for Full Internet Access
 
-While we've attached an internet gateway, resources in "Public 1" still can't reach the internet. Why?
+While we've attached an internet gateway, resources in "Public 1" still can't reach the internet. Why? Route tables. We haven't told the subnet to use the internet gateway for outbound traffic. 
 
-**Route tables** - We haven't told the subnet to use the internet gateway for outbound traffic. In a production setup, you'd need to:
-1. Create/modify route table
-2. Add route: `0.0.0.0/0` → Internet Gateway
-3. Associate route table with subnet
+In a production setup, you'd need to create or modify route table, add route 0.0.0.0/0 pointing to Internet Gateway, and associate route table with subnet. For this learning project, we focused on the core VPC components.
 
-For this learning project, I focused on the core VPC components. 
-
-## Cleanup
+Cleanup
 
 When you're done exploring, delete resources to avoid charges:
 
-1. **Detach Internet Gateway:**
-   - Internet Gateways → Select NextWork IG → Actions → Detach from VPC
+1. Detach Internet Gateway:
+   - Internet Gateways, select NextWork IG, Actions, Detach from VPC
 
-2. **Delete Internet Gateway:**
-   - Actions → Delete internet gateway
+2. Delete Internet Gateway:
+   - Actions, Delete internet gateway
 
-3. **Delete Subnet:**
-   - Subnets → Select Public 1 → Actions → Delete subnet
+3. Delete Subnet:
+   - Subnets, select Public 1, Actions, Delete subnet
 
-4. **Delete VPC:**
-   - Your VPCs → Select NextWork VPC → Actions → Delete VPC
+4. Delete VPC:
+   - Your VPCs, select NextWork VPC, Actions, Delete VPC
 
-## Console vs CLI Comparison
+Console vs CLI Comparison
 
-### Console Advantages:
+Console Advantages:
 - Visual confirmation at each step
 - Easier to understand relationships between resources
 - Better for learning AWS concepts
 - No need to remember command syntax
 
-### Console Disadvantages:
+Console Disadvantages:
 - Slower (multiple page loads and clicks)
 - Harder to replicate setup across environments
 - Can't version control in Git
-- Manual process = more room for human error
+- Manual process means more room for human error
 
-## Common Issues
+Common Issues
 
-**"VPC CIDR block size must be between /16 and /28"**
-- Solution: Use CIDR like 10.0.0.0/16, not /8 or /32
+"VPC CIDR block size must be between /16 and /28"
+Solution: Use CIDR like 10.0.0.0/16, not /8 or /32
 
-**"Subnet CIDR overlaps with existing subnet"**
-- Solution: Each subnet needs unique IP range (e.g., 10.0.1.0/24, 10.0.2.0/24)
+"Subnet CIDR overlaps with existing subnet"
+Solution: Each subnet needs unique IP range (e.g., 10.0.1.0/24, 10.0.2.0/24)
 
-**"Cannot delete VPC - has dependencies"**
-- Solution: Delete subnets and IGW first, then VPC
+"Cannot delete VPC - has dependencies"
+Solution: Delete subnets and IGW first, then VPC
