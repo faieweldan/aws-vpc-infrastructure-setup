@@ -360,7 +360,9 @@ In this phase, I validated network behavior across my VPC architecture by testin
 
 - SSH access to the public EC2 instance  
 - Communication between public and private instances  
-- Internet connectivity from within the VPC  
+- Internet connectivity from within the VPC
+  
+<img width="548" height="578" alt="image" src="https://github.com/user-attachments/assets/ca06c5cf-35e1-4156-b367-518ef07d862f" />
 
 ---
 
@@ -438,6 +440,8 @@ The VPC architecture is now fully validated for connectivity.
 ## Part 6: VPC Peering
 
 In this phase, I expanded my network architecture by connecting two isolated VPCs using VPC Peering and validating private cross-VPC communication.
+
+<img width="548" height="584" alt="Screenshot 2026-02-15 at 4 08 29 PM" src="https://github.com/user-attachments/assets/860ed71e-f78d-4f2d-b144-2bfac4b2e05c" />
 
 ---
 
@@ -559,6 +563,8 @@ This confirms a functional multi-VPC architecture using private networking.
 In this phase, I extended my multi-VPC architecture by implementing **network-level monitoring using VPC Flow Logs and CloudWatch Logs Insights**.
 
 This builds on the previous VPC Peering setup by adding visibility into network traffic.
+
+<img width="546" height="571" alt="Screenshot 2026-02-15 at 4 07 50 PM" src="https://github.com/user-attachments/assets/9caf1d11-7163-4ee9-8cb0-d7d6be3109db" />
 
 ---
 
