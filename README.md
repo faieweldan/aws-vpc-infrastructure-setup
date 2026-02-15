@@ -20,15 +20,15 @@ A multi-phase deep dive into AWS networking, compute, and connectivity patterns.
 
 Each phase is documented in detail:
 
-1. [Part 1: VPC Setup](part1-vpc-setup.md)
-2. [Part 2: Traffic Flow & Security](part2-traffic-flow-security.md)
-3. [Part 3: Private Subnet Architecture](part3-private-subnet.md)
-4. [Part 4: Launching VPC Resources](part4-launching-resources.md)
-5. [Part 5: Testing VPC Connectivity](part5-testing-connectivity.md)
-6. [Part 6: VPC Peering](part6-vpc-peering.md)
-7. [Part 7: VPC Monitoring with Flow Logs](part7-flow-logs.md)
-8. [Part 8: Access S3 from a VPC](part8-s3-access.md)
-9. [Part 9: VPC Endpoints](part9-vpc-endpoints.md)
+1. [Part 1: VPC Setup](01_vpc_setup.md)
+2. [Part 2: Traffic Flow & Security](02_traffic_flow_security.md)
+3. [Part 3: Private Subnet Architecture](03_private_subnet.md)
+4. [Part 4: Launching VPC Resources](04_launching_resource.md)
+5. [Part 5: Testing VPC Connectivity](05_testing_connectivity.md)
+6. [Part 6: VPC Peering](06_vpc_peering.md)
+7. [Part 7: VPC Monitoring with Flow Logs](07_flow_logs.md)
+8. [Part 8: Access S3 from a VPC](08_s3_access.md)
+9. [Part 9: VPC Endpoints](09_vpc_endpoints.md)
 
 ---
 
